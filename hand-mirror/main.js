@@ -8,7 +8,7 @@ const scene = new THREE.Scene();
 scene.background = null;
 
 const camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.z = 7;
+camera.position.z = 5;
 
 // --- Hand points (left / right) ---
 let leftHandPoints = createHandModel(0x00ffff);
@@ -201,7 +201,7 @@ function createPartModel(color, count) {
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(count * 3);
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const material = new THREE.PointsMaterial({ color, size: 0.05 }); // oldingi 0.08 emas
+    const material = new THREE.PointsMaterial({ color, size: 0.06 }); // oldingi 0.08 emas
     const points = new THREE.Points(geometry, material);
     points.visible = false;
     return points;
@@ -220,19 +220,24 @@ const noseIndices = [1, 2, 3, 4, 5, 6, 195, 196, 197, 7, 8, 9, 10]; // dublikatl
 const browIndices =
     [...Array(36).keys()].map(i => 70 + i).filter(i => i <= 105)
         .concat([...Array(30).keys()].map(i => 336 + i).filter(i => i <= 365));
+const earIndices = [127, 234, 454, 447];
+// chap va o‘ng quloq chetlari
+
 
 // Create parts with proper counts
 let eyePoints = createPartModel(0x0000ff, eyeIndices.length);   // ko‘zlar ko‘k
 let mouthPoints = createPartModel(0xff0000, mouthIndices.length); // og‘iz qizil
 let browPoints = createPartModel(0x000000, browIndices.length);  // qoshlar qora
 let nosePoints = createPartModel(0xffcc00, noseIndices.length);  // burun zarg‘aldoq (golden yellow)
+let earPoints = createPartModel(0xff9900, earIndices.length); // quloqlar to‘q sariq
 
 eyePoints.renderOrder = 1;
 mouthPoints.renderOrder = 2;
 nosePoints.renderOrder = 3;
 browPoints.renderOrder = 4;
+earPoints.renderOrder = 5; // qatlam tartibi
 
-scene.add(eyePoints, mouthPoints, nosePoints, browPoints);
+scene.add(eyePoints, mouthPoints, nosePoints, browPoints, earPoints);
 
 function updatePart(landmarks, indices, points) {
     const positions = points.geometry.attributes.position.array;
@@ -312,6 +317,7 @@ faceMesh.onResults((results) => {
     updatePart(landmarks, mouthIndices, mouthPoints);
     updatePart(landmarks, noseIndices, nosePoints);
     updatePart(landmarks, browIndices, browPoints);
+    updatePart(landmarks, earIndices, earPoints);
 
     // Update skeleton (if available)
     updateFaceSkeleton(landmarks, faceSkeleton);
